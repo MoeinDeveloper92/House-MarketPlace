@@ -3,9 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ReactComponent as OfferIcon } from "../assets/svg/localOfferIcon.svg";
 import { ReactComponent as ExploreIcon } from "../assets/svg/exploreIcon.svg";
 import { ReactComponent as PersonOutlineIcon } from "../assets/svg/personOutlineIcon.svg";
-
 function Navbar() {
-  // in order to make use of this hooks we need to initilzei them
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,8 +19,8 @@ function Navbar() {
           <li className="navbarListItem" onClick={() => navigate("/")}>
             <ExploreIcon
               fill={pathMatchRoute("/") ? "#2c2c2c" : "#8f8f8f"}
-              width="36px"
-              height="36px"
+              width={"36px"}
+              height={"36px"}
             />
             <p
               className={
@@ -37,9 +35,8 @@ function Navbar() {
           <li className="navbarListItem" onClick={() => navigate("/offers")}>
             <OfferIcon
               fill={pathMatchRoute("/offers") ? "#2c2c2c" : "#8f8f8f"}
-              width="36px"
-              height="36px"
-              onClick={() => navigate("/offers")}
+              width={"36px"}
+              height={"36px"}
             />
             <p
               className={
@@ -53,10 +50,9 @@ function Navbar() {
           </li>
           <li className="navbarListItem" onClick={() => navigate("/profile")}>
             <PersonOutlineIcon
+              width={"36px"}
+              height={"36px"}
               fill={pathMatchRoute("/profile") ? "#2c2c2c" : "#8f8f8f"}
-              width="36px"
-              height="36px"
-              onClick={() => navigate("/profile")}
             />
             <p
               className={
