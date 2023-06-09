@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-// we have visiblity icond if you want to show actual icons
-import visiblityIcon from "../assets/svg/visibilityIcon.svg";
+import visiblity from "../assets/svg/visibilityIcon.svg";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  singInWithEmailAndPassword,
+} from "firebase/auth";
+import { toast } from "react-toastify";
 function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -12,10 +16,9 @@ function SignIn() {
     password: "",
   });
   const { email, password } = formData;
-
   const navigate = useNavigate();
 
-  const onChange = (e) => {
+  const handleChange = (e) => {
     setFormData((preState) => ({
       ...preState,
       [e.target.id]: e.target.value,
@@ -24,7 +27,6 @@ function SignIn() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(
@@ -36,62 +38,53 @@ function SignIn() {
         navigate("/");
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Bad user Credentials");
     }
   };
-
   return (
-    <motion.div
-      initial={{
-        x: "-100%",
-      }}
-      animate={{
-        x: 0,
-      }}
-    >
+    <motion.div>
       <div className="pageContainer">
         <header>
-          <p className="pageHeader">Welcome Back!</p>
+          <p className="pageHeader">Welcome Back</p>
         </header>
-
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Email"
-            id="email"
-            value={email}
-            onChange={onChange}
-            className="emailInput"
-          />
-          <div className="passwordInputDiv">
+        <main>
+          <form onSubmit={handleSubmit}>
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="passwordInput"
-              id="password"
-              value={password}
-              onChange={onChange}
+              type="email"
+              className="emailInput"
+              placeholder="Email"
+              id="email"
+              value={email}
+              onChange={handleChange}
             />
-            <img
-              src={visiblityIcon}
-              alt="Show Password"
-              className="showPassword"
-              onClick={() => setShowPassword((pre) => !pre)}
-            />
-          </div>
-          <Link to={"/forgot-password"} className="forgotPasswordLink">
-            Forgot Password
-          </Link>
-          <div className="signInBar">
-            <p className="signInText">Sign In</p>
-            <button className="signInButton">
-              <ArrowRightIcon fill="#fff" width={"34px"} height={"34px"} />
-            </button>
-          </div>
-        </form>
-
-        {/* Google OAth */}
-
+            <div className="passwordInputDiv">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="passwordInput"
+                placeholder="Password"
+                id="password"
+                value={password}
+                onChange={handleChange}
+              />
+              <img
+                src={visiblity}
+                className="showPassword"
+                alt="showPassword"
+                onClick={() => setShowPassword((pre) => !pre)}
+              />
+            </div>
+            <Link className="forgotPasswordLink" to={"/forgot-password"}>
+              Forgot Password?
+            </Link>
+            <div className="signInBar">
+              <p className="signInText">Sign In</p>
+              <button className="signInButton">
+                <ArrowRightIcon fill="#fff" width="34px" height="34px" />
+              </button>
+            </div>
+          </form>
+        </main>
+        {/* google OAth */}
         <Link to={"/sign-up"} className="registerLink">
           Sign Up Instead
         </Link>
