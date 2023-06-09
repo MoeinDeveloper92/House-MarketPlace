@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { toast } from "react-toastify";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase.config";
-
-// we have visiblity icond if you want to show actual icons
+import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
 import visiblityIcon from "../assets/svg/visibilityIcon.svg";
+
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,14 +19,13 @@ function SignUp() {
     email: "",
     password: "",
   });
-
   const { name, email, password } = formData;
-
   const navigate = useNavigate();
 
-  const onChange = (e) => {
-    setFormData((preState) => ({
-      ...preState,
+  const handleChange = (e) => {
+    // bellow we get the prevState and then update it
+    setFormData((prevState) => ({
+      ...prevState,
       [e.target.id]: e.target.value,
     }));
   };
@@ -34,37 +33,34 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // we are getting auth from getAuth
+      // bellow we are getting an instance of the newly authenticated user
       const auth = getAuth();
-      // we are registerign the user with this function
-      // below function return a promise
+      //bellow we're registering the user with this
+      // it will return a user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-
-      // bellow we can get the actual use information
+      // we can get the user from that userCreadential
       const user = userCredential.user;
       updateProfile(auth.currentUser, {
         displayName: name,
       });
-
-      // we copying everythin inside the statem since we dont want ot change the state
-
+      // bellow we add documetn to the fire store
       const formDataCopy = { ...formData };
-      // i dont want the form password to be submitted in the database
+      // I dont want the password to get submitteed to the databse
       delete formDataCopy.password;
-      // once it has been submitted the server timespamp will be added to it.
+      // once th form submitted, a time stamp will be added.
       formDataCopy.timestamp = serverTimestamp();
 
-      // set doc is a function which updates the database
       await setDoc(doc(db, "users", user.uid), formDataCopy);
       navigate("/");
     } catch (error) {
-      console.log(error);
+      toast.error("Something wend wrong with registration");
     }
   };
+  // id should be as the same as it is in the state
   return (
     <motion.div
       initial={{
@@ -76,58 +72,58 @@ function SignUp() {
     >
       <div className="pageContainer">
         <header>
-          <p className="pageHeader">Welcome Back!</p>
+          <p className="pageHeader">Registration page</p>
         </header>
-
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Your Name"
-            id="name"
-            value={name}
-            onChange={onChange}
-            className="nameInput"
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            id="email"
-            value={email}
-            onChange={onChange}
-            className="emailInput"
-          />
-          <div className="passwordInputDiv">
+        <main>
+          <form onSubmit={handleSubmit}>
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="passwordInput"
-              id="password"
-              value={password}
-              onChange={onChange}
+              type="text"
+              className="nameInput"
+              placeholder="Name"
+              id="name"
+              value={name}
+              onChange={handleChange}
             />
-            <img
-              src={visiblityIcon}
-              alt="Show Password"
-              className="showPassword"
-              onClick={() => setShowPassword((pre) => !pre)}
+            <input
+              type="email"
+              className="emailInput"
+              placeholder="Email"
+              id="email"
+              value={email}
+              onChange={handleChange}
             />
-          </div>
-          <Link to={"/forgot-password"} className="forgotPasswordLink">
-            Forgot Password
+            <div className="passwordInputDiv">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="passwordInput"
+                placeholder="Password"
+                id="password"
+                value={password}
+                onChange={handleChange}
+              />
+              <img
+                src={visiblityIcon}
+                className="showPassword"
+                alt="Show Password"
+                onClick={() => setShowPassword((pre) => !pre)}
+              />
+            </div>
+            <Link to={"/forgot-password"} className="forgotPasswordLink">
+              Forgot Password
+            </Link>
+
+            <div className="signUpBar">
+              <p className="signUpText">Sign UP</p>
+              <button className="signUpButton">
+                <ArrowRightIcon fill="#fff" width={"34px"} height={"34px"} />
+              </button>
+            </div>
+          </form>
+          {/* Google OAth Componenet */}
+          <Link to={"/sign-in"} className="registerLink">
+            Sign In Instead
           </Link>
-          <div className="signUpBar">
-            <p className="signUpText">Sign Up</p>
-            <button className="signUpButton">
-              <ArrowRightIcon fill="#fff" width={"34px"} height={"34px"} />
-            </button>
-          </div>
-        </form>
-
-        {/* Google OAth */}
-
-        <Link to={"/sign-in"} className="registerLink">
-          Sign In Instead
-        </Link>
+        </main>
       </div>
     </motion.div>
   );
