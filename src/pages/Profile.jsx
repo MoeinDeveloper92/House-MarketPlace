@@ -1,60 +1,66 @@
-import React, { useEffect, useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
-import { updateDoc, doc } from "firebase/firestore";
-import { db } from "../firebase.config";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase.config";
 import { toast } from "react-toastify";
 
 function Profile() {
   const auth = getAuth();
   const [changeDetails, setChangeDetails] = useState(false);
+  //we are going to set the user by the data we get back from the db
   const [formData, setFormData] = useState({
     name: auth.currentUser.displayName,
     email: auth.currentUser.email,
-    // these info come from auth.currentUser
   });
   const { name, email } = formData;
   const navigate = useNavigate();
-  const onLogout = () => {
-    auth.signOut();
-    navigate("/");
-  };
-
-  const onSubmit = async () => {
-    try {
-      if (auth.currentUser.displayName !== name) {
-        // Update display name in firebase
-        await updateProfile(auth.currentUser, {
-          displayName: name,
-        });
-
-        // update in the firestore
-        // we need toc reate a refrence
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        await updateDoc(userRef, {
-          name,
-        });
-      }
-    } catch (error) {
-      toast.error("could not update profile details");
-    }
-  };
 
   const handleChange = (e) => {
-    // here we update form state
     setFormData((preState) => ({
       ...preState,
       [e.target.id]: e.target.value,
     }));
   };
+  const onLogout = () => {
+    auth.signOut();
+    navigate("/");
+  };
+
+  // since this functionr eturns a promise we need to make use of async await
+  const onSubmit = async () => {
+    // bellow we update the databas
+    try {
+      if (auth.currentUser.displayName !== name) {
+        //update profile
+        await updateProfile(
+          auth.currentUser({
+            displayName: name,
+          })
+        );
+
+        //update in firestore
+        //the id in teh fire store is the same as the id in the fire storage
+        // in order to update a document we need to create a refrence
+        const ueserRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(ueserRef, {
+          name,
+        });
+      }
+    } catch (error) {
+      toast.error("Could not update profile details.");
+    }
+  };
+
   return (
     <div className="profile">
       <header className="profileHeader">
         <p className="pageHeader">My Profile</p>
-        <button type="button" onClick={onLogout} className="logOut">
+        <button onClick={onLogout} className="logOut" type="button">
           Logout
         </button>
       </header>
+
       <main>
         <div className="profileDetailsHeader">
           <p className="profileDetailsText">Personal Details</p>
@@ -65,27 +71,27 @@ function Profile() {
               setChangeDetails((pre) => !pre);
             }}
           >
-            {changeDetails ? "done" : "change"}
+            {changeDetails ? "Done" : "Change"}
           </p>
         </div>
+
         <div className="profileCard">
           <form>
             <input
-              type="text"
-              className={!changeDetails ? "profileName" : "profileNameActive"}
-              id="name"
-              disabled={!changeDetails}
               value={name}
               onChange={handleChange}
+              disabled={!changeDetails}
+              type="text"
+              id="name"
+              className={!changeDetails ? "profileName" : "profileNameActive"}
             />
             <input
-              // id shold be mathcehs whatever the name of state is
-              type="text"
-              className={!changeDetails ? "profileEmail" : "profileEmailActive"}
-              id="email"
-              disabled={!changeDetails}
               value={email}
               onChange={handleChange}
+              disabled={!changeDetails}
+              type="email"
+              id="email"
+              className={!changeDetails ? "profileEmail" : "profileEmailActive"}
             />
           </form>
         </div>
@@ -95,5 +101,3 @@ function Profile() {
 }
 
 export default Profile;
-// if you reaload, the info gets gone, it renders the compnent before get the data from firebasem,
-//
