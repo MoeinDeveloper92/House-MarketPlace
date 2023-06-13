@@ -33,12 +33,9 @@ function Profile() {
     try {
       if (auth.currentUser.displayName !== name) {
         //update profile
-        await updateProfile(
-          auth.currentUser({
-            displayName: name,
-          })
-        );
-
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
         //update in firestore
         //the id in teh fire store is the same as the id in the fire storage
         // in order to update a document we need to create a refrence
@@ -46,6 +43,7 @@ function Profile() {
         await updateDoc(ueserRef, {
           name,
         });
+        toast.success("User has been updated!");
       }
     } catch (error) {
       toast.error("Could not update profile details.");

@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
 import visiblityIcon from "../assets/svg/visibilityIcon.svg";
+import OAuth from "../components/OAuth";
 
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -114,12 +115,12 @@ function SignUp() {
 
             <div className="signUpBar">
               <p className="signUpText">Sign UP</p>
-              <button className="signUpButton">
+              <button type="submit" className="signUpButton">
                 <ArrowRightIcon fill="#fff" width={"34px"} height={"34px"} />
               </button>
             </div>
           </form>
-          {/* Google OAth Componenet */}
+          <OAuth />
           <Link to={"/sign-in"} className="registerLink">
             Sign In Instead
           </Link>
