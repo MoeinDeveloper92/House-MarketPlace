@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 
 function Category() {
+  //listing
   const [listings, setListings] = useState(null);
   //  once we fetch the listing , we set the loading to false
   const [loading, setLoading] = useState(true);
