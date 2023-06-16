@@ -1,10 +1,9 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-// instead of getting a single document, we want to get a collection
 import {
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   orderBy,
@@ -16,61 +15,65 @@ import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 
 function Category() {
-  //listing
   const [listings, setListings] = useState(null);
-  //  once we fetch the listing , we set the loading to false
-  const [loading, setLoading] = useState(true);
-
+  const [loading, setLoading] = useState(false);
   const { categoryName } = useParams();
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        //Get a refrence
-        const listingRef = collection(db, "listings");
+        // Get a refrence to the collection
+        const listingsRef = collection(db, "listings");
 
-        // Create a query
+        //create a query
         const q = query(
-          listingRef,
+          listingsRef,
           where("type", "==", categoryName),
-          orderBy("timestamp", "desc"),
+          orderBy("timeStamp", "desc"),
           limit(10)
         );
 
-        // Execute query
-        // get the document for that specfic query
-
+        //Execute query
         const querySnap = await getDocs(q);
+        console.log(q);
+        const listings = [];
 
-        let listings = [];
         querySnap.forEach((doc) => {
           return listings.push({
             id: doc.id,
             data: doc.data(),
           });
         });
-
         setListings(listings);
         setLoading(false);
       } catch (error) {
-        toast.error("Could not fetch Listings");
+        toast.error("Could not fetch listings");
       }
     };
 
     fetchListings();
-  }, []);
+  }, [categoryName]);
 
   return (
     <div className="category">
       <header>
         <p className="pageHeader">
-          {categoryName === "rent" ? "Places for rent" : "places for sale"}
+          {categoryName === "rent" ? "places for rent" : "places for sale"}
         </p>
       </header>
+
       {loading ? (
         <Spinner />
       ) : listings && listings.length > 0 ? (
-        <></>
+        <>
+          <main>
+            <ul className="categoryListings">
+              {listings.map((listing) => (
+                <h3>{listing.data.name}</h3>
+              ))}
+            </ul>
+          </main>
+        </>
       ) : (
         <p>No Listings for {categoryName}</p>
       )}
@@ -79,4 +82,5 @@ function Category() {
 }
 
 export default Category;
-// here we want to fetch the listing from fire base and dipaly them
+
+// we want to fetch collection listing from the firestore

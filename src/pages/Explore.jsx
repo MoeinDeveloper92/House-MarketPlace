@@ -6,31 +6,31 @@ function Explore() {
   return (
     <div className="explore">
       <header>
-        <p className="pageHeader">House Market Property</p>
-      </header>
+        <p className="pageHeader">Explore</p>
 
-      <main>
-        {/* Slider will go here */}
-        <p className="exploreCategoryHeading">Categories</p>
-        <div className="exploreCategories">
-          <Link to={"/category/rent"}>
-            <img
-              src={rentCategoryImage}
-              alt="Rent"
-              className="exploreCategoryImg"
-            />
-            <p className="exploreCategoryName">Places for Rent</p>
-          </Link>
-          <Link to={"/category/sell"}>
-            <img
-              src={sellCategoryImage}
-              alt="Rent"
-              className="exploreCategoryImg"
-            />
-            <p className="exploreCategoryName">Places for sale</p>
-          </Link>
-        </div>
-      </main>
+        <main>
+          {/* Slider */}
+          <p className="exploreCategoryHeading">Categories</p>
+          <div className="exploreCategories">
+            <Link to={"/category/rent"}>
+              <img
+                src={rentCategoryImage}
+                alt="Rent"
+                className="exploreCategoryImg"
+              />
+              <p className="exploreCategoryName">Places For Rent</p>
+            </Link>
+            <Link to={"/category/sale"}>
+              <img
+                src={sellCategoryImage}
+                alt="Sell"
+                className="exploreCategoryImg"
+              />
+              <p className="exploreCategoryName">Places For Sell</p>
+            </Link>
+          </div>
+        </main>
+      </header>
     </div>
   );
 }

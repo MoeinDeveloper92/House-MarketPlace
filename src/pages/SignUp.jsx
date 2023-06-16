@@ -38,6 +38,7 @@ function SignUp() {
       const auth = getAuth();
       //bellow we're registering the user with this
       // it will return a user
+      //create user with credentials like user,email,auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
