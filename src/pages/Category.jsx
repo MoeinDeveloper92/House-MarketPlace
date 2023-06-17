@@ -29,13 +29,13 @@ function Category() {
         const q = query(
           listingsRef,
           where("type", "==", categoryName),
-          orderBy("timeStamp", "desc"),
+          orderBy("timestamp", "desc"),
           limit(10)
         );
 
         //Execute query
         const querySnap = await getDocs(q);
-        console.log(q);
+
         const listings = [];
 
         querySnap.forEach((doc) => {
@@ -84,3 +84,4 @@ function Category() {
 export default Category;
 
 // we want to fetch collection listing from the firestore
+//today is enough

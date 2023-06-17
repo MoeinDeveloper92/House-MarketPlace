@@ -49,6 +49,7 @@ function SignUp() {
       updateProfile(auth.currentUser, {
         displayName: name,
       });
+
       // bellow we add documetn to the fire store
       const formDataCopy = { ...formData };
       // I dont want the password to get submitteed to the databse
