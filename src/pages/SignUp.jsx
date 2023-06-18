@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+
 import { toast } from "react-toastify";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase.config";
@@ -44,6 +46,8 @@ function SignUp() {
         email,
         password
       );
+      // await sendEmailVerification(auth, email);
+
       // we can get the user from that userCreadential
       const user = userCredential.user;
       updateProfile(auth.currentUser, {
@@ -60,7 +64,7 @@ function SignUp() {
       await setDoc(doc(db, "users", user.uid), formDataCopy);
       navigate("/");
     } catch (error) {
-      toast.error("Something wend wrong with registration");
+      toast.error("Something went wrong with registration");
     }
   };
   // id should be as the same as it is in the state
