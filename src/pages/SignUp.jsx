@@ -67,6 +67,7 @@ function SignUp() {
       toast.error("Something went wrong with registration");
     }
   };
+  //
   // id should be as the same as it is in the state
   return (
     <motion.div
