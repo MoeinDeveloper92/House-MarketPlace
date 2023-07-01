@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+//we need to import firestore as database
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -13,5 +14,7 @@ const firebaseConfig = {
 // we pass firebaseConfig to initlize app
 
 // Initialize Firebase
+//we are passing api key asnd project id and all the information within the project
 initializeApp(firebaseConfig);
+
 export const db = getFirestore();

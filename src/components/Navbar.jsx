@@ -1,8 +1,9 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ReactComponent as OfferIcon } from "../assets/svg/localOfferIcon.svg";
 import { ReactComponent as ExploreIcon } from "../assets/svg/exploreIcon.svg";
 import { ReactComponent as PersonOutlineIcon } from "../assets/svg/personOutlineIcon.svg";
+
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,13 +23,7 @@ function Navbar() {
               width={"36px"}
               height={"36px"}
             />
-            <p
-              className={
-                pathMatchRoute("/")
-                  ? "navbarListItemNameActive"
-                  : "navbarListItemName"
-              }
-            >
+            <p style={{ color: pathMatchRoute("/") ? "#2c2c2c" : "#8f8f8f" }}>
               Explore
             </p>
           </li>
@@ -39,32 +34,23 @@ function Navbar() {
               height={"36px"}
             />
             <p
-              className={
-                pathMatchRoute("/offers")
-                  ? "navbarListItemNameActive"
-                  : "navbarListItemName"
-              }
+              style={{
+                color: pathMatchRoute("/offers") ? "#2c2c2c" : "#8f8f8f",
+              }}
             >
               Offer
             </p>
           </li>
-          <li
-            className="navbarListItem"
-            onClick={() => {
-              navigate("/profile");
-            }}
-          >
+          <li className="navbarListItem" onClick={() => navigate("/profile")}>
             <PersonOutlineIcon
               fill={pathMatchRoute("/profile") ? "#2c2c2c" : "#8f8f8f"}
               width={"36px"}
               height={"36px"}
             />
             <p
-              className={
-                pathMatchRoute("/profile")
-                  ? "navbarListItemNameActive"
-                  : "navbarListItemName"
-              }
+              style={{
+                color: pathMatchRoute("/profile") ? "#2c2c2c" : "#8f8f8f",
+              }}
             >
               Profile
             </p>
