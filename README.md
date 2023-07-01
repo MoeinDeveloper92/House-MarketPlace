@@ -1,24 +1,13 @@
-FireBase=> it is an all in one platform, we get databases, we get authentication, we get file storgae since within this project we upload images with the house listing.
-Firebsae is a greate tool when it coesm to creating mobile and desktip applciaiton.
-1-create Firebase Project
-2-create "web" app within firebase to get config file//api key
-3-Install firebase in your project 'npm install firebase'
-4-create config file within the project
-5-add Authentication for email/password and Google
-6-Create a use from firebase
-/////////////////
-in the way of creating firebsae, avoid ticking firebase hoisting.
-Register app.
-it iwll giver api key and all stuyiur need.
-you need to create a onfig file within your app and then put this code overther
-firebase.config.js
-grab all the code from firebase and pasete on the firebase.xonfig.js
-firestore is a database which you will use
-import {getFirestrore} from './firebase/firestore'
+Firebase=> it is an all in one platfrom/ we can get databases, we can get authentications, file storage=> since we will going to upload images.
 
-export const db = getFirestroe()...
-/////////////////////////
-how to add authentication?
-go to firebase, and within your dashboard fo to authentication// and then hit get srated. there will be a page and show you some bunch of stauug
-what you need is Google Oath amd email,password.
-hit email/password and then enable that
+we need to create a firebase project and give it a nock name. it will then give us some infomraiton about api key and project ocnfiguration. then we need to get into the root direcotry of the project and create a file called firebase.config.js... then we need to copy the given information within the created file.
+
+next step we need to enable authenticaiton within the project. we need to add Google OAth.
+go to authentication and get started and then choose you intended provider.
+enable that and add new provider and choose google anmd enable that and change public facing name and click save.
+next to test the authentication we need to creat a user.
+when you go to authentixation you will see all your users. all your users that signup thorough your applcaiton. when you add user, it will automatically give you an id. this id later will be used thorugh listing,
+next step is yo enable firestore within the prioject,.
+
+now we need to got to fire store and create a listing.
+a document is just an item is just a record. each document has got a unique documetn id.
