@@ -15,6 +15,7 @@ function OAuth() {
       const auth = getAuth();
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      console.log(result);
       const user = result.user;
 
       //first check to see if the user is exist in fire store or not
