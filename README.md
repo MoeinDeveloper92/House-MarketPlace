@@ -12,3 +12,4 @@ keep in mind that, always start your project with a blueprint, with a gist, it m
 11-create 4 composite indexes for advanced querying,.
 ////////////////////////
 have it in your mind, once you have created the file, you will be directed to your dashboard.
+we have two types of database, 1- Real time database=> which is a database that firebase use.
