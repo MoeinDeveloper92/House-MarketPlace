@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArroRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
 import visiblity from "../assets/svg/visibilityIcon.svg";
-
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from "react-toastify";
 function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,6 +20,25 @@ function SignIn() {
     }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+
+      const useCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      if (useCredential.user) {
+        toast.success("You are signed...");
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error("Bad User Credentials...");
+    }
+  };
+
   return (
     <>
       <div className="pageContainer">
@@ -26,7 +46,7 @@ function SignIn() {
           <p className="pageHeader">Welcome Back!</p>
         </header>
         <main>
-          <form>
+          <form onSubmit={handleSubmit}>
             <input
               type="email"
               placeholder="Email"

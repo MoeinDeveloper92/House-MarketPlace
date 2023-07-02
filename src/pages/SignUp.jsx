@@ -8,6 +8,7 @@ import {
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
+import { toast } from "react-toastify";
 //serverTimestam allows us to add a timestamp field
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 
@@ -55,7 +56,7 @@ function SignUp() {
 
       navigate("/");
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong with regitration...");
     }
   };
 
