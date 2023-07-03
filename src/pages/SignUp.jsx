@@ -37,6 +37,7 @@ function SignUp() {
 
     try {
       const auth = getAuth();
+
       const userCreadential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -112,6 +113,8 @@ function SignUp() {
               </button>
             </div>
           </form>
+
+          {/* OAth Section */}
           <OAuth />
 
           <Link to={"/sign-in"} className="registerLink">

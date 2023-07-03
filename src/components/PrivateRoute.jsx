@@ -10,5 +10,5 @@ const PrivateRoute = () => {
     return loggedIn ? <Outlet /> : <Navigate to={"/sign-in"} />;
   }
 };
-
+//check to see whether the user has been logged in or not
 export default PrivateRoute;
