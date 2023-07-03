@@ -2,6 +2,7 @@ import React from "react";
 import rentCategoryImage from "../assets/jpg/rentCategoryImage.jpg";
 import sellCategoryImage from "../assets/jpg/sellCategoryImage.jpg";
 import { Link } from "react-router-dom";
+
 function Explore() {
   return (
     <div className="explore">
@@ -20,7 +21,7 @@ function Explore() {
             />
             <p className="exploreCategoryName">Places for rent</p>
           </Link>
-          <Link to={"/category/sell"}>
+          <Link to={"/category/sale"}>
             <img
               src={sellCategoryImage}
               alt="Sell"
