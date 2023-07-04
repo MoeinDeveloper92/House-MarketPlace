@@ -5,8 +5,8 @@ import visiblity from "../assets/svg/visibilityIcon.svg";
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   updateProfile,
+  sendEmailVerification,
 } from "firebase/auth";
 import { toast } from "react-toastify";
 //serverTimestam allows us to add a timestamp field
@@ -44,6 +44,7 @@ function SignUp() {
         password
       );
       const user = userCreadential.user;
+      await sendEmailVerification(user);
       updateProfile(auth.currentUser, {
         displayName: name,
       });
@@ -55,7 +56,7 @@ function SignUp() {
       formDataCopy.timestamp = serverTimestamp();
       //setDoc returns a promise, thas's why we use await
       await setDoc(doc(db, "users", user.uid), formDataCopy);
-
+      toast.success("Please check your email account.");
       navigate("/");
     } catch (error) {
       toast.error("Something went wrong with regitration...");
