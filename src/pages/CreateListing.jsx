@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
-
+import { toast } from "react-toastify";
 function CreateListing() {
   //we need to have access to userRef to get the logged in user
+
   const [loading, setLoading] = useState(false);
-  const [geolocationEnabled, setGeolocationEnabled] = useState(true);
+  const [geolocationEnabled, setGeolocationEnabled] = useState(false);
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -40,7 +41,7 @@ function CreateListing() {
 
   const auth = getAuth();
 
-  const anvigate = useNavigate();
+  const navigate = useNavigate();
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -67,7 +68,52 @@ function CreateListing() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setLoading(true);
+    //here we take the address and trun it into latitude and longitude
+    //here we perform image uploads and submit it into the firebase
+    if (discountedPrice >= regularPrice) {
+      setLoading(false);
+      toast.error("Discounted price needs to be less than regular price");
+      return;
+    }
+
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error("Max 6 Images");
+      return;
+    }
+
+    //bellow is an object which holds lat and long
+    let geoLocation = {};
+    let location;
+
+    if (geolocationEnabled) {
+      //if it is enabled we need to make a request to the google
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
+      );
+      const data = await res.json();
+      geoLocation.lat = data.results[0]?.geometry.location.lat ?? 0;
+      geoLocation.lng = data.results[0]?.geometry.location.lng ?? 0;
+
+      location =
+        data.status === "ZERO_RESULTS"
+          ? "undefiend"
+          : data.results[0]?.formatted_address;
+
+      if (location === "undefiend") {
+        setLoading(false);
+        toast.error("Please enter a correct address");
+        return;
+      }
+    } else {
+      //if geolocaiton is not nebaled
+      geoLocation.lat = latitude;
+      geoLocation.lng = longitude;
+      location = address;
+      console.log(geoLocation, location);
+    }
+    setLoading(false);
   };
 
   const onMutate = (e) => {
@@ -107,9 +153,9 @@ function CreateListing() {
           <div className="formButtons">
             <button
               type="button"
-              className={type === "sale" ? "formButtonActive" : "formButton"}
+              className={type === "sell" ? "formButtonActive" : "formButton"}
               id="type"
-              value={"sale"}
+              value={"sell"}
               onClick={onMutate}
             >
               Sell
@@ -117,7 +163,7 @@ function CreateListing() {
             <button
               type="button"
               className={type === "rent" ? "formButtonActive" : "formButton"}
-              id="rent"
+              id="type"
               value={"rent"}
               onClick={onMutate}
             >
