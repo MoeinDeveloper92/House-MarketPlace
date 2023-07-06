@@ -117,6 +117,8 @@ function CreateListing() {
   };
 
   const onMutate = (e) => {
+    //the true or false will come here as string
+    //therefore , we need to set it as actual true or false
     let boolean = null;
 
     if (e.target.value === "true") {
@@ -127,6 +129,7 @@ function CreateListing() {
     }
 
     // Files
+    //this is going to be an array of files that we chose
     if (e.target.files) {
       setFormData((preState) => ({
         ...preState,
@@ -134,7 +137,7 @@ function CreateListing() {
       }));
     }
 
-    // Text/Booleans.Numbers
+    // Text/Booleans/Numbers
     if (!e.target.files) {
       setFormData((preState) => ({
         ...preState,
@@ -153,13 +156,14 @@ function CreateListing() {
           <div className="formButtons">
             <button
               type="button"
-              className={type === "sell" ? "formButtonActive" : "formButton"}
+              className={type === "sale" ? "formButtonActive" : "formButton"}
               id="type"
-              value={"sell"}
+              value={"sale"}
               onClick={onMutate}
             >
               Sell
             </button>
+
             <button
               type="button"
               className={type === "rent" ? "formButtonActive" : "formButton"}
