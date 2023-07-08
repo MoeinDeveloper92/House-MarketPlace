@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { db } from "../firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
 function CreateListing() {
   //we need to have access to userRef to get the logged in user
 
@@ -113,6 +121,60 @@ function CreateListing() {
       location = address;
       console.log(geoLocation, location);
     }
+    //Store image in firebase
+    const storeImage = async (image) => {
+      //we want to return a new promise
+      return new Promise((resolve, reject) => {
+        //if the promise is completed it reutrns  a resolve otherwise it returns a reject
+        const storage = getStorage();
+        //create filename
+        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+        //create a stroage refrence
+        const storageRef = ref(storage, "images/" + fileName);
+        //create an upload task
+        const uploadTask = uploadBytesResumable(storageRef, image);
+
+        uploadTask.on("state_changed", (snapshot) => {
+          //it observes state change events such as progress,pause,resume
+          //Get task prgress, including the number oif bytes uploaded and the total number of bytes to be uploaded
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is" + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+          (error) => {
+            //Handle unsuccessful uploads
+            reject(error);
+          };
+
+          () => {
+            //handle successful uploads on compleete
+            //for ecample get the downaload url
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+            });
+          };
+        });
+      });
+    };
+    //i am gonna ccall that functions for the all images that are uploaded and it reutrn a promise
+    //whic resolve multile priomises
+    //this function put all the urls which were resolved in the image url
+    const imageURLs = await Promise.all(
+      [...images].map((image) => storeImage(image))
+    ).catch(() => {
+      setLoading(false);
+      toast.error("Images not uploaded");
+      return;
+    });
+
+    console.log(imageURLs);
     setLoading(false);
   };
 
