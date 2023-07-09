@@ -15,6 +15,7 @@ function Navbar() {
   };
 
   return (
+    //i have put footer since it is stick in the foot section of my app, for SEO purposes
     <footer className="navbar">
       <nav className="navbarNav">
         <ul className="navbarListItems">
