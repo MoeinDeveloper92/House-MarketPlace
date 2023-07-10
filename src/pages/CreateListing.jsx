@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import { toast } from "react-toastify";
 
 function CreateListing() {
   const [loading, setLoading] = useState(false);
-  const [geolocationEnabled, setGeolocationEnabled] = useState(true);
+  const [geolocationEnabled, setGeolocationEnabled] = useState(false);
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -66,10 +67,78 @@ function CreateListing() {
     return <Spinner />;
   }
 
-  const onMutate = (e) => {};
+  const onMutate = (e) => {
+    //check to see wether it is a file upload or another data type
+    //for booleans it comes here as a string and we need to trun it to actual boolean
+    let boolean = null;
 
-  const onSubmit = (e) => {
+    if (e.target.value === "true") {
+      boolean = true;
+    }
+    if (e.target.value === "false") {
+      boolean = false;
+    }
+
+    //Files
+    if (e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        //is an array of images
+        images: e.target.files,
+      }));
+    }
+
+    //Text||bool||numbers
+    if (!e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        //if boo is null, make use of right side
+        [e.target.id]: boolean ?? e.target.value,
+      }));
+    }
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    //here we do geo coding and do upload images on storage and put data in fire store
+    if (discountedPrice >= regularPrice) {
+      setLoading(false);
+      toast.error("The discounted price should be less than regular price");
+      return;
+    }
+    //we need to make sure that the user cannot upload more than six images
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error("Max 6 images");
+      return;
+    }
+    //this is an object which holds latitude and longitude
+    let geolocation = {};
+    let location = {};
+
+    if (geolocationEnabled) {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${"AIzaSyD8Vab - I38pZmEGAgVMykfgqjb_ygbQey8"}`
+      );
+      const data = await res.json();
+      geolocation.lat = data.results[0]?.geometry.location.lat ?? 0;
+      geolocation.lng = data.results[0]?.geometry.location.lng ?? 0;
+      location =
+        data.status === "ZERO_RESULTS"
+          ? "undefined"
+          : data.results[0]?.formatted_address;
+      if (location === undefined || location.includes("undefined")) {
+        setLoading(false);
+        toast.error("Please Enter a correct addres");
+        return;
+      }
+    } else {
+      geolocation.lat = latitude;
+      geolocation.lng = longitude;
+      location = address;
+    }
+    setLoading(false);
   };
   return (
     <div className="profile">
@@ -77,11 +146,13 @@ function CreateListing() {
         <p className="pageHeader">Create a Listing</p>
       </header>
       <main>
+        {/* form has got onSubmit handler for form submission */}
         <form onSubmit={onSubmit}>
           <label className="formLabel">Sell / Rent</label>
           <div className="formButtons">
             <button
               type="button"
+              //when we set our state we look at the id, it should be matcehd
               id="type"
               value={"sale"}
               onClick={onMutate}
@@ -162,7 +233,7 @@ function CreateListing() {
               value={false}
               onClick={onMutate}
             >
-              Yes
+              No
             </button>
           </div>
 
@@ -242,6 +313,10 @@ function CreateListing() {
               className={
                 !offer && offer !== null ? "formButtonActive" : "formButton"
               }
+              id="offer"
+              type="button"
+              value={false}
+              onClick={onMutate}
             >
               No
             </button>
@@ -292,6 +367,9 @@ function CreateListing() {
             multiple
             required
           />
+          <button className="primaryButton createListingButton" type="submit">
+            Create Listing
+          </button>
         </form>
       </main>
     </div>
