@@ -1,4 +1,6 @@
+//this is simlar to category and we catch data fromd atabase
 import React, { useEffect, useState } from "react";
+
 import { useParams } from "react-router-dom";
 import {
   collection,

@@ -1,18 +1,17 @@
 import React from "react";
-//some changes
 import { Link } from "react-router-dom";
 import { ReactComponent as DeleteIcon } from "../assets/svg/deleteIcon.svg";
 import bedIcon from "../assets/svg/bedIcon.svg";
 import bathtubIcon from "../assets/svg/bathtubIcon.svg";
+import { list } from "firebase/storage";
 function ListingItem({ listing, id, onDelete }) {
+  const pattern = /(\d)(?=(\d{3})+$)/g;
+  const replacement = "$1,";
   return (
     <li className="categoryListing">
-      <Link
-        to={`/category/${listing.type}/${id}`}
-        className="categoryListingLink"
-      >
+      <Link to={`/category/${listing.type}/id`} className="categoryListingLink">
         <img
-          src={listing.imageUrls[1]}
+          src={listing.imageUrls[0]}
           alt={listing.name}
           className="categoryListingImg"
         />
@@ -21,21 +20,26 @@ function ListingItem({ listing, id, onDelete }) {
           <p className="categoryListingName">{listing.name}</p>
 
           <p className="categoryListingPrice">
-            $ {listing.offer ? listing.discountedPrice : listing.regularPrice}
-            {listing.type === "rent" && "/Month"}
+            ${" "}
+            {listing.offer
+              ? listing.discountedPrice.toString().replace(pattern, replacement)
+              : listing.regularPrice.toString().replace(pattern, replacement)}
+            {listing.type === "rent" && "/ Month"}
           </p>
+
           <div className="categoryListingInfoDiv">
             <img src={bedIcon} alt="bed" />
             <p className="categoryListingInfoText">
               {listing.bedrooms > 1
                 ? `${listing.bedrooms} Bedrooms`
-                : `1 BedRoom`}
+                : "1 Bedrooms"}
             </p>
-            <img src={bathtubIcon} alt="bath" />
+
+            <img src={bathtubIcon} alt="Bathroom" />
             <p className="categoryListingInfoText">
               {listing.bathrooms > 1
                 ? `${listing.bathrooms} Bathrooms`
-                : `1 BathRoom`}
+                : "1 Bathrooms"}
             </p>
           </div>
         </div>
@@ -43,7 +47,7 @@ function ListingItem({ listing, id, onDelete }) {
       {onDelete && (
         <DeleteIcon
           className="removeIcon"
-          fill="rgb(231,76,60)"
+          fill="rgb(231,78,60)"
           onClick={() => onDelete(listing.id, listing.name)}
         />
       )}

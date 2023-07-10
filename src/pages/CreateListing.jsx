@@ -1,22 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import { toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
-function CreateListing() {
-  //we need to have access to userRef to get the logged in user
 
+function CreateListing() {
   const [loading, setLoading] = useState(false);
-  const [geolocationEnabled, setGeolocationEnabled] = useState(false);
+  const [geolocationEnabled, setGeolocationEnabled] = useState(true);
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -32,6 +21,7 @@ function CreateListing() {
     latitude: 0,
     longitude: 0,
   });
+
   const {
     type,
     name,
@@ -47,9 +37,8 @@ function CreateListing() {
     latitude,
     longitude,
   } = formData;
-
+  //we need to hvae userRef, which is the logged user in the app
   const auth = getAuth();
-
   const navigate = useNavigate();
   const isMounted = useRef(true);
 
@@ -57,9 +46,13 @@ function CreateListing() {
     if (isMounted) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          setFormData({ ...formData, userRef: user.uid });
+          //we are getting the user from here
+          setFormData({
+            ...formData,
+            userRef: user.uid,
+          });
         } else {
-          navigator("/sign-in");
+          navigate("/sign-in");
         }
       });
     }
@@ -67,162 +60,16 @@ function CreateListing() {
     return () => {
       isMounted.current = false;
     };
-    //keep in mind that, if you add add formData as depdencny, uif the form data changes, you get stuck in a never ending loop
-    //eslint-disabled-nex-line react-hooks/exhaustive-deps
+    //eslint-disbaled-next-line react-hooks/exhaustive-deps
   }, [isMounted]);
-
   if (loading) {
     return <Spinner />;
   }
 
-  const handleSubmit = async (e) => {
+  const onMutate = (e) => {};
+
+  const onSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    //here we take the address and trun it into latitude and longitude
-    //here we perform image uploads and submit it into the firebase
-    if (discountedPrice >= regularPrice) {
-      setLoading(false);
-      toast.error("Discounted price needs to be less than regular price");
-      return;
-    }
-
-    if (images.length > 6) {
-      setLoading(false);
-      toast.error("Max 6 Images");
-      return;
-    }
-
-    //bellow is an object which holds lat and long
-    let geoLocation = {};
-    let location;
-
-    if (geolocationEnabled) {
-      //if it is enabled we need to make a request to the google
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
-      );
-      const data = await res.json();
-      geoLocation.lat = data.results[0]?.geometry.location.lat ?? 0;
-      geoLocation.lng = data.results[0]?.geometry.location.lng ?? 0;
-
-      location =
-        data.status === "ZERO_RESULTS"
-          ? "undefiend"
-          : data.results[0]?.formatted_address;
-
-      if (location === "undefiend") {
-        setLoading(false);
-        toast.error("Please enter a correct address");
-        return;
-      }
-    } else {
-      //if geolocaiton is not nebaled
-      geoLocation.lat = latitude;
-      geoLocation.lng = longitude;
-      location = address;
-      console.log(geoLocation, location);
-    }
-    //Store image in firebase
-    const storeImage = async (image) => {
-      //we want to return a new promise
-      return new Promise((resolve, reject) => {
-        //if the promise is completed it reutrns  a resolve otherwise it returns a reject
-        const storage = getStorage();
-        //create filename
-        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
-        //create a stroage refrence
-        const storageRef = ref(storage, "images/" + fileName);
-        //create an upload task
-        const uploadTask = uploadBytesResumable(storageRef, image);
-
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            // it observes state change events such as progress, pause, resume
-            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-            }
-          },
-          (error) => {
-            // Handle unsuccessful uploads
-            reject(error);
-          },
-          () => {
-            // Handle successful uploads on complete
-            // For example, get the download URL
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL);
-            });
-          }
-        );
-      });
-    };
-    //i am gonna ccall that functions for the all images that are uploaded and it reutrn a promise
-    //whic resolve multile priomises
-    //this function put all the urls which were resolved in the image url
-    const imageUrls = await Promise.all(
-      [...images].map((image) => storeImage(image))
-    ).catch(() => {
-      setLoading(false);
-      toast.error("Images not uploaded");
-      return;
-    });
-
-    const formDataCopy = {
-      ...formData,
-      imageUrls,
-      geoLocation,
-      timestamp: serverTimestamp(),
-    };
-    delete formDataCopy.images;
-    delete formDataCopy.address;
-    location && (formDataCopy.location = location);
-    !formDataCopy.offer && delete formDataCopy.discountedPrice;
-    const docRef = await addDoc(collection(db, "listings"), formDataCopy);
-    setLoading(false);
-    toast.success("Listing saved");
-    navigate(`/category/${formDataCopy.type}/${docRef.id}`);
-
-    setLoading(false);
-  };
-
-  const onMutate = (e) => {
-    //the true or false will come here as string
-    //therefore , we need to set it as actual true or false
-    let boolean = null;
-
-    if (e.target.value === "true") {
-      boolean = true;
-    }
-    if (e.target.value === "false") {
-      boolean = false;
-    }
-
-    // Files
-    //this is going to be an array of files that we chose
-    if (e.target.files) {
-      setFormData((preState) => ({
-        ...preState,
-        images: e.target.files,
-      }));
-    }
-
-    // Text/Booleans/Numbers
-    if (!e.target.files) {
-      setFormData((preState) => ({
-        ...preState,
-        [e.target.id]: boolean ?? e.target.value,
-      }));
-    }
   };
   return (
     <div className="profile">
@@ -230,25 +77,24 @@ function CreateListing() {
         <p className="pageHeader">Create a Listing</p>
       </header>
       <main>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={onSubmit}>
           <label className="formLabel">Sell / Rent</label>
           <div className="formButtons">
             <button
               type="button"
-              className={type === "sale" ? "formButtonActive" : "formButton"}
               id="type"
               value={"sale"}
               onClick={onMutate}
+              className={type === "sale" ? "formButtonActive" : "formButton"}
             >
               Sell
             </button>
-
             <button
               type="button"
-              className={type === "rent" ? "formButtonActive" : "formButton"}
               id="type"
               value={"rent"}
               onClick={onMutate}
+              className={type === "rent" ? "formButtonActive" : "formButton"}
             >
               Rent
             </button>
@@ -258,6 +104,7 @@ function CreateListing() {
             type="text"
             className="formInputName"
             id="name"
+            //value is the name for state
             value={name}
             onChange={onMutate}
             maxLength={"32"}
@@ -275,12 +122,12 @@ function CreateListing() {
                 value={bedrooms}
                 onChange={onMutate}
                 min={"1"}
-                max={"50"}
+                max="50"
                 required
               />
             </div>
             <div>
-              <lable className="formLabel">Bathrooms</lable>
+              <label className="formLabel">Bathrooms</label>
               <input
                 type="number"
                 className="formInputSmall"
@@ -288,7 +135,7 @@ function CreateListing() {
                 value={bathrooms}
                 onChange={onMutate}
                 min={"1"}
-                max={"50"}
+                max="50"
                 required
               />
             </div>
@@ -304,7 +151,7 @@ function CreateListing() {
               min="1"
               max="50"
             >
-              YES
+              Yes
             </button>
             <button
               className={
@@ -315,9 +162,10 @@ function CreateListing() {
               value={false}
               onClick={onMutate}
             >
-              NO
+              Yes
             </button>
           </div>
+
           <label className="formLabel">Furnished</label>
           <div className="formButtons">
             <button
@@ -327,7 +175,7 @@ function CreateListing() {
               value={true}
               onClick={onMutate}
             >
-              YES
+              Yes
             </button>
             <button
               className={
@@ -340,25 +188,25 @@ function CreateListing() {
               value={false}
               onClick={onMutate}
             >
-              NO
+              No
             </button>
           </div>
           <label className="formLabel">Address</label>
           <textarea
-            id="address"
             className="formInputAddress"
             type="text"
+            id="address"
             value={address}
             onChange={onMutate}
             required
-          />
+          ></textarea>
           {!geolocationEnabled && (
             <div className="formLatLng flex">
               <div>
                 <label className="formLabel">Latitude</label>
                 <input
-                  type="number"
                   className="formInputSmall"
+                  type="number"
                   id="latitude"
                   value={latitude}
                   onChange={onMutate}
@@ -366,10 +214,10 @@ function CreateListing() {
                 />
               </div>
               <div>
-                <label className="formLabel">Longitude</label>
+                <label className="formLabel">Latitude</label>
                 <input
-                  type="number"
                   className="formInputSmall"
+                  type="number"
                   id="longitude"
                   value={longitude}
                   onChange={onMutate}
@@ -379,7 +227,7 @@ function CreateListing() {
             </div>
           )}
 
-          <label>Offer</label>
+          <label className="formLabel">Offer</label>
           <div className="formButtons">
             <button
               className={offer ? "formButtonActive" : "formButton"}
@@ -388,38 +236,35 @@ function CreateListing() {
               value={true}
               onClick={onMutate}
             >
-              YES
+              Yes
             </button>
             <button
               className={
                 !offer && offer !== null ? "formButtonActive" : "formButton"
               }
-              type="button"
-              id="offer"
-              value={false}
-              onClick={onMutate}
             >
-              NO
+              No
             </button>
           </div>
+
           <label className="formLabel">Regular Price</label>
+
           <div className="formPriceDiv">
             <input
-              type="number"
               className="formInputSmall"
+              type="number"
               id="regularPrice"
               value={regularPrice}
               onChange={onMutate}
               min={"50"}
-              max={"750000000"}
+              max={"7500000000"}
               required
             />
-            {type === "rent" && <p className="formPriceText">$ / Month</p>}
+            {type === "rent" && <p className="formDataText">$ / Month</p>}
           </div>
           {offer && (
             <>
               <label className="formLabel">Discounted Price</label>
-
               <input
                 type="number"
                 className="formInputSmall"
@@ -427,11 +272,12 @@ function CreateListing() {
                 value={discountedPrice}
                 onChange={onMutate}
                 min={"50"}
-                max={"750000000"}
-                required={offer}
+                max={"7500000000"}
+                required
               />
             </>
           )}
+
           <label className="formLabel">Images</label>
           <p className="imagesInfo">
             The first image will be the cover (max 6).
@@ -442,13 +288,10 @@ function CreateListing() {
             id="images"
             onChange={onMutate}
             max={"6"}
-            accept=".jpg, .png , .jpeg"
+            accept=".jpg,.png,.jpeg"
             multiple
             required
           />
-          <button className="primaryButton createListingButton" type="submit">
-            Create Listing
-          </button>
         </form>
       </main>
     </div>
@@ -456,4 +299,3 @@ function CreateListing() {
 }
 
 export default CreateListing;
-//we need to have component level state
