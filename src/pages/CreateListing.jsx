@@ -3,7 +3,14 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
-
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import { progress } from "framer-motion";
 function CreateListing() {
   const [loading, setLoading] = useState(false);
   const [geolocationEnabled, setGeolocationEnabled] = useState(false);
@@ -102,24 +109,24 @@ function CreateListing() {
     e.preventDefault();
     setLoading(true);
     //here we do geo coding and do upload images on storage and put data in fire store
-    if (discountedPrice >= regularPrice) {
+    if (discountedPrice > regularPrice) {
       setLoading(false);
-      toast.error("The discounted price should be less than regular price");
+      toast.error("Discounted price needs to be less than regular price");
       return;
     }
     //we need to make sure that the user cannot upload more than six images
     if (images.length > 6) {
       setLoading(false);
-      toast.error("Max 6 images");
+      toast.error("Max 6 images ");
       return;
     }
     //this is an object which holds latitude and longitude
     let geolocation = {};
-    let location = {};
+    let location;
 
     if (geolocationEnabled) {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${"AIzaSyD8Vab - I38pZmEGAgVMykfgqjb_ygbQey8"}`
+        `https://maps.googleapis.com/maps/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
       );
       const data = await res.json();
       geolocation.lat = data.results[0]?.geometry.location.lat ?? 0;
@@ -127,10 +134,10 @@ function CreateListing() {
       location =
         data.status === "ZERO_RESULTS"
           ? "undefined"
-          : data.results[0]?.formatted_address;
+          : data.results[0].formatted_address;
       if (location === undefined || location.includes("undefined")) {
         setLoading(false);
-        toast.error("Please Enter a correct addres");
+        toast.error("Please enter a correct address");
         return;
       }
     } else {
@@ -138,6 +145,59 @@ function CreateListing() {
       geolocation.lng = longitude;
       location = address;
     }
+
+    //Store image in firebase
+    const storeImage = async (image) => {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+
+        //create stroage refrence
+        //ref is a refrence to a particular file in the bucket in the storage
+        const storageRef = ref(storage, "images/" + fileName);
+
+        //we need to create an upload task
+        const uploadTask = uploadBytesResumable(storageRef, image);
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            let result = `upload is ${progress}%done`;
+
+            switch (snapshot.state) {
+              case "paused":
+                console.log("Upload Paused");
+                break;
+              case "running":
+                console.log("Upload is running");
+                break;
+            }
+          },
+          (error) => {
+            //Handle unsusccsful
+            reject(error);
+          },
+          () => {
+            //handle success
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+              //this download url will go bellow to the imageurl
+            });
+          }
+        );
+      });
+    };
+
+    //call functions for all the images that are uploaded/
+    const imageUrls = await Promise.all(
+      [...images].map((image) => storeImage(image))
+    ).catch(() => {
+      setLoading(false);
+      toast.error("Images not Uploaded");
+      return;
+    });
+    console.log(imageUrls);
     setLoading(false);
   };
   return (
@@ -367,6 +427,7 @@ function CreateListing() {
             multiple
             required
           />
+          <p>{progress}</p>
           <button className="primaryButton createListingButton" type="submit">
             Create Listing
           </button>

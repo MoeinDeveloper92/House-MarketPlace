@@ -9,7 +9,10 @@ function ListingItem({ listing, id, onDelete }) {
   const replacement = "$1,";
   return (
     <li className="categoryListing">
-      <Link to={`/category/${listing.type}/id`} className="categoryListingLink">
+      <Link
+        to={`/category/${listing.type}/${id}`}
+        className="categoryListingLink"
+      >
         <img
           src={listing.imageUrls[0]}
           alt={listing.name}
