@@ -109,7 +109,7 @@ function SignUp() {
 
             <div className="signInBar">
               <p className="signInText">Sign Up</p>
-              <button className="signInButton">
+              <button className="signInButton" type="submit">
                 <ArroRightIcon fill="#fff" width={"34px"} height={"34px"} />
               </button>
             </div>

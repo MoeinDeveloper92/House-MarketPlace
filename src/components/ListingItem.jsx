@@ -13,6 +13,7 @@ function ListingItem({ listing, id, onDelete }) {
         to={`/category/${listing.type}/${id}`}
         className="categoryListingLink"
       >
+        {/* first image is for cover */}
         <img
           src={listing.imageUrls[0]}
           alt={listing.name}

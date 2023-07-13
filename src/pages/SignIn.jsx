@@ -24,6 +24,7 @@ function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      //if an error occurs in the try block, the catch block will be executed
       const auth = getAuth();
 
       const useCredential = await signInWithEmailAndPassword(
