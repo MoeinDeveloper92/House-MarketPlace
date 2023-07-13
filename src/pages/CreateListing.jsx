@@ -10,7 +10,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-import { progress } from "framer-motion";
+
 function CreateListing() {
   const [loading, setLoading] = useState(false);
   const [geolocationEnabled, setGeolocationEnabled] = useState(false);
@@ -147,6 +147,7 @@ function CreateListing() {
     }
 
     //Store image in firebase
+    //
     const storeImage = async (image) => {
       return new Promise((resolve, reject) => {
         const storage = getStorage();
@@ -427,7 +428,7 @@ function CreateListing() {
             multiple
             required
           />
-          <p>{progress}</p>
+
           <button className="primaryButton createListingButton" type="submit">
             Create Listing
           </button>
