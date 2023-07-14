@@ -90,3 +90,9 @@ function Category() {
 }
 
 export default Category;
+
+// `doc.data()` is a method provided by the Firebase Firestore library that returns the data of a specific document in a collection. In the provided code snippet, `doc.data()` is used to retrieve the data of each document returned by the query and create an array of objects with the `id` and `data` properties.
+
+// The `forEach` loop iterates through the `querySnap` object, which is a `QuerySnapshot` containing the documents returned by the query. For each document, the loop pushes an object with the document ID and the data returned by `doc.data()` into the `listings` array.
+
+// By doing this, the `listings` array contains an array of objects, where each object represents a document in the `listings` collection. The `id` property represents the ID of the document, and the `data` property contains an object with the data of the document.
