@@ -36,7 +36,7 @@ function Category() {
         //Execute query
         const querySnap = await getDocs(q);
 
-        // we need to loop through the snapshot
+        // we need to loop through the snapshott
         let listings = [];
 
         querySnap.forEach((doc) => {
