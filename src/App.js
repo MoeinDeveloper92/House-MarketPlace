@@ -34,6 +34,7 @@ function App() {
           element={<Listing />}
         />
       </Routes>
+      {/*  */}
       <Navbar />
 
       <ToastContainer autoClose={3000} />
